@@ -2,7 +2,6 @@
   "name": "gendiff-valser",
   "version": "0.0.1",
   "description": "backend-project-lvl2",
-  "type": "module",
   "main": "dist/index.js",
   "bin": {
     "gendiff": "dist/bin/gendiff.js"
