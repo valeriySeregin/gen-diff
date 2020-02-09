@@ -1,0 +1,37 @@
+{
+  "name": "gendiff-valser",
+  "version": "0.0.1",
+  "description": "backend-project-lvl2",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "gendiff": "dist/bin/gendiff"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "NODE_ENV=production babel src --out-dir dist --source-maps inline",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/valeriySeregin/backend-project-lvl2.git"
+  },
+  "author": "Valeriy Seregin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/valeriySeregin/backend-project-lvl2/issues"
+  },
+  "homepage": "https://github.com/valeriySeregin/backend-project-lvl2#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
+    "@babel/node": "^7.8.4",
+    "@babel/preset-env": "^7.8.4"
+  },
+  "dependencies": {
+    "commander": "^4.1.1"
+  }
+}
