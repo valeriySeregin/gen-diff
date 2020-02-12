@@ -1,5 +1,15 @@
 #!/usr/bin/env node
 
-import help from '../index.js';
+import program from 'commander';
+import getArgumentsForAction from '..';
 
-help();
+program
+  .version('0.2.0')
+  .description('Compares two configuration files and shows a difference.')
+  .option('-f, --format [type]', 'output format')
+  .arguments('<firstConfig> <secondConfig>')
+  .action((firstConfig, secondConfig) => {
+    console.log(getArgumentsForAction(firstConfig, secondConfig));
+  });
+
+program.parse(process.argv);

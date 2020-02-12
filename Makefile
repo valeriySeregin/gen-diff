@@ -1,7 +1,7 @@
 install: install-deps
 
 run:
-	npx babel-node 'src/bin/gendiff.js'
+	npx babel-node 'src/bin/gendiff.js' -h
 
 install-deps:
 	npm ci
@@ -11,6 +11,6 @@ build:
 	npm run build
 
 publish:
-	npm publish
+	npm publish --dry-run
 
 .PHONY: test
