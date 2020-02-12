@@ -1,6 +1,6 @@
 {
   "name": "gendiff-valser",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "backend-project-lvl2",
   "main": "dist/index.js",
   "bin": {
@@ -12,7 +12,7 @@
   "scripts": {
     "build": "NODE_ENV=production babel src --out-dir dist --source-maps inline",
     "prepublishOnly": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -23,14 +23,27 @@
   "bugs": {
     "url": "https://github.com/valeriySeregin/backend-project-lvl2/issues"
   },
+  "jest": {
+    "testEnvironment": "node"
+  },
   "homepage": "https://github.com/valeriySeregin/backend-project-lvl2#readme",
   "devDependencies": {
     "@babel/cli": "^7.8.4",
     "@babel/core": "^7.8.4",
     "@babel/node": "^7.8.4",
-    "@babel/preset-env": "^7.8.4"
+    "@babel/preset-env": "^7.8.4",
+    "babel-eslint": "^10.0.3",
+    "babel-jest": "^25.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-babel": "^5.3.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jest": "^23.7.0",
+    "jest": "^25.1.0",
+    "jest-cli": "^25.1.0"
   },
   "dependencies": {
-    "commander": "^4.1.1"
+    "commander": "^4.1.1",
+    "lodash": "^4.17.15"
   }
 }
