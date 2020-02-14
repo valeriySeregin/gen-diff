@@ -1,17 +1,16 @@
+import path from 'path';
 import fs from 'fs';
-import { getIndividualKeys, getDiffString } from './utils.js';
+import getDiffString from './utils.js';
+
+const getFilePath = (filename) => path.join(process.cwd(), filename);
+const readFile = (filename) => fs.readFileSync(getFilePath(filename), 'utf-8');
 
 export default (firstConfig, secondConfig) => {
-  const firstJson = fs.readFileSync(firstConfig).toString();
-  const secondJson = fs.readFileSync(secondConfig).toString();
+  const firstJson = readFile(firstConfig);
+  const secondJson = readFile(secondConfig);
 
   const firstObjectFromJson = JSON.parse(firstJson);
   const secondObjectFromJson = JSON.parse(secondJson);
 
-  const firstObjKeys = Object.keys(firstObjectFromJson);
-  const secondObjKeys = Object.keys(secondObjectFromJson);
-
-  const individualKeys = getIndividualKeys(firstObjKeys, secondObjKeys);
-
-  return getDiffString(secondObjectFromJson, firstObjectFromJson, individualKeys);
+  return getDiffString(firstObjectFromJson, secondObjectFromJson);
 };
