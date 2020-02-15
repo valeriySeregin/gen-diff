@@ -1,16 +1,10 @@
-import path from 'path';
-import fs from 'fs';
-import getDiffString from '../src/utils.js';
+import parse from '../src/parsers';
+import getDiffString from '../src/utils';
 
-const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
-const readFile = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8');
+const firstObjectFromJson = parse('__fixtures__/before.json');
+const secondObjectFromJson = parse('__fixtures__/after.json');
 
-const beforeFixture = readFile('before.json');
-const afterFixture = readFile('after.json');
-const firstObjectFromJson = JSON.parse(beforeFixture);
-const secondObjectFromJson = JSON.parse(afterFixture);
-
-test('passes when diff is equal to difference between before and after', () => {
+test('passes when diff is equal to difference between before.json and after.json', () => {
   const expected = `{
     host: hexlet.io
   + timeout: 20
@@ -20,10 +14,12 @@ test('passes when diff is equal to difference between before and after', () => {
   + verbose: true
 }`;
 
-  expect(getDiffString(firstObjectFromJson, secondObjectFromJson)).toMatch(expected);
+  const received = getDiffString(firstObjectFromJson, secondObjectFromJson);
+
+  expect(received).toMatch(expected);
 });
 
-test('passes when diff is equal to difference between after and before', () => {
+test('passes when before.json and after.json switched', () => {
   const expected = `{
   + timeout: 50
   - timeout: 20
@@ -33,5 +29,40 @@ test('passes when diff is equal to difference between after and before', () => {
   + follow: false
 }`;
 
-  expect(getDiffString(secondObjectFromJson, firstObjectFromJson)).toMatch(expected);
+  const received = getDiffString(secondObjectFromJson, firstObjectFromJson);
+
+  expect(received).toMatch(expected);
+});
+
+const firstObjectFromYaml = parse('__fixtures__/before.yml');
+const secondObjectFromYaml = parse('__fixtures__/after.yml');
+
+test('passes when diff is equal to difference between before.yml and after.yml', () => {
+  const expected = `{
+    host: hexlet.io
+  + timeout: 20
+  - timeout: 50
+  - proxy: 123.234.53.22
+  - follow: false
+  + verbose: true
+}`;
+
+  const received = getDiffString(firstObjectFromYaml, secondObjectFromYaml);
+
+  expect(received).toMatch(expected);
+});
+
+test('passes when before.yml and after.yml switched', () => {
+  const expected = `{
+  + timeout: 50
+  - timeout: 20
+  - verbose: true
+    host: hexlet.io
+  + proxy: 123.234.53.22
+  + follow: false
+}`;
+
+  const received = getDiffString(secondObjectFromYaml, firstObjectFromYaml);
+
+  expect(received).toMatch(expected);
 });

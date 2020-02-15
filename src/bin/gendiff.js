@@ -4,7 +4,7 @@ import program from 'commander';
 import getArgumentsForAction from '..';
 
 program
-  .version('0.2.0')
+  .version('0.4.0')
   .description('Compares two configuration files and shows a difference.')
   .option('-f, --format [type]', 'output format')
   .arguments('<firstConfig> <secondConfig>')
