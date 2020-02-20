@@ -1,9 +1,13 @@
-import getDiffString from './utils';
+import { getAst, render } from './utils';
 import parse from './parsers';
 
-export default (firstConfig, secondConfig) => {
+const getDiffString = (firstConfig, secondConfig) => {
   const firstObject = parse(firstConfig);
   const secondObject = parse(secondConfig);
+  const ast = getAst(firstObject, secondObject);
+  const diffString = render(ast);
 
-  return getDiffString(firstObject, secondObject);
+  return diffString;
 };
+
+export default getDiffString;

@@ -1,22 +1,39 @@
 import parse from '../src/parsers';
-import getDiffString from '../src/utils';
+import { getAst, render } from '../src/utils';
 
-const expected1 = `{
-    host: hexlet.io
-  + timeout: 20
-  - timeout: 50
-  - proxy: 123.234.53.22
-  - follow: false
-  + verbose: true
-}`;
-
-const expected2 = `{
-  + timeout: 50
-  - timeout: 20
-  - verbose: true
-    host: hexlet.io
-  + proxy: 123.234.53.22
-  + follow: false
+const expected = `{
+    common: {
+        setting1: Value 1
+      - setting2: 200
+      - setting3: true
+      + setting3: {
+            key: value
+        }
+        setting6: {
+            key: value
+          + ops: vops
+        }
+      + follow: false
+      + setting4: blah blah
+      + setting5: {
+            key5: value5
+        }
+    }
+    group1: {
+      - baz: bas
+      + baz: bars
+        foo: bar
+      - nest: {
+            key: value
+        }
+      + nest: str
+    }
+  - group2: {
+        abc: 12345
+    }
+  + group3: {
+        fee: 100500
+    }
 }`;
 
 test.each([
@@ -24,13 +41,7 @@ test.each([
   [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
   [parse('__fixtures__/before.ini'), parse('__fixtures__/after.ini')],
 ])('getDiffString(%o, %o)', (obj1, obj2) => {
-  expect(getDiffString(obj1, obj2)).toMatch(expected1);
-});
-
-test.each([
-  [parse('__fixtures__/after.json'), parse('__fixtures__/before.json')],
-  [parse('__fixtures__/after.yml'), parse('__fixtures__/before.yml')],
-  [parse('__fixtures__/after.ini'), parse('__fixtures__/before.ini')],
-])('getDiffString(%o, %o)', (obj1, obj2) => {
-  expect(getDiffString(obj1, obj2)).toMatch(expected2);
+  const ast = getAst(obj1, obj2);
+  const received = render(ast);
+  expect(received).toMatch(expected);
 });
