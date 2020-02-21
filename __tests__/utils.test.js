@@ -1,5 +1,6 @@
 import parse from '../src/parsers';
-import { getAst, render } from '../src/utils';
+import getAst from '../src/utils';
+import render from '../src/formatters/treeRender';
 
 const expected = `{
     common: {

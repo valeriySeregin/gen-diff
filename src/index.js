@@ -1,4 +1,5 @@
-import { getAst, render } from './utils';
+import getAst from './utils';
+import render from './formatters/treeRender';
 import parse from './parsers';
 
 const getDiffString = (firstConfig, secondConfig) => {
