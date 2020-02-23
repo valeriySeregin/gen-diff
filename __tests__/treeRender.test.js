@@ -1,5 +1,5 @@
 import parse from '../src/parsers';
-import getAst from '../src/utils';
+import getAst from '../src/ast';
 import render from '../src/formatters/treeRender';
 
 const expected = `{

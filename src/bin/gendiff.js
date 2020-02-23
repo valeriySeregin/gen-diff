@@ -4,12 +4,12 @@ import program from 'commander';
 import getDiffString from '..';
 
 program
-  .version('0.4.0')
+  .version('0.5.0')
   .description('Compares two configuration files and shows a difference.')
-  .option('-f, --format [type]', 'output format')
+  .option('-f, --format [type]', 'output format', 'tree')
   .arguments('<firstConfig> <secondConfig>')
-  .action((firstConfig, secondConfig) => {
-    const diffString = getDiffString(firstConfig, secondConfig);
+  .action((firstConfig, secondConfig, options) => {
+    const diffString = getDiffString(firstConfig, secondConfig, options.format);
     console.log(diffString);
   });
 

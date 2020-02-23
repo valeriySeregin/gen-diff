@@ -3,21 +3,34 @@ import {
   flattenDeep,
   isObject,
 } from 'lodash';
-import getAst from '../utils';
+import getAst from '../ast';
+
+const getFilledValue = (arr) => {
+  const [firstValue, secondValue] = arr;
+
+  if (isNull(firstValue)) {
+    return secondValue;
+  }
+  if (isNull(secondValue)) {
+    return firstValue;
+  }
+
+  return arr;
+};
 
 const getSign = (status) => {
   switch (status) {
     case 'added':
-      return '+ ';
-    case 'deleted':
-      return '- ';
+      return ['+ '];
+    case 'removed':
+      return ['- '];
     case 'unchanged':
-      return '  ';
+      return ['  '];
     default:
       break;
   }
 
-  return '';
+  return ['- ', '+ '];
 };
 
 const render = (ast) => {
@@ -26,7 +39,7 @@ const render = (ast) => {
       const {
         name,
         status,
-        value,
+        values,
         children,
       } = item;
 
@@ -37,12 +50,31 @@ const render = (ast) => {
         return [...acc, `${indent}  ${sign}${name}: {`, iter(children, count + 1), `${indent}    }`];
       }
 
-      if (isObject(value)) {
-        const astFromValue = getAst(value, value);
-        return [...acc, `${indent}  ${sign}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`];
+      if (sign.length === 2) {
+        const [signBefore, signAfter] = sign;
+        const [before, after] = values;
+
+        if (isObject(before)) {
+          const astFromValue = getAst(before, before);
+          return [...acc, `${indent}  ${signBefore}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`, `${indent}  ${signAfter}${name}: ${after}`];
+        }
+        if (isObject(after)) {
+          const astFromValue = getAst(after, after);
+          return [...acc, `${indent}  ${signBefore}${name}: ${before}`, `${indent}  ${signAfter}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`];
+        }
+
+        return [...acc, `${indent}  ${signBefore}${name}: ${before}`, `${indent}  ${signAfter}${name}: ${after}`];
       }
 
-      return [...acc, `${indent}  ${sign}${name}: ${value}`];
+      const [signStr] = sign;
+      const filledValue = getFilledValue(values);
+
+      if (isObject(filledValue)) {
+        const astFromValue = getAst(filledValue, filledValue);
+        return [...acc, `${indent}  ${signStr}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`];
+      }
+
+      return [...acc, `${indent}  ${signStr}${name}: ${filledValue}`];
     }, []);
 
     return diffElementsArray;
