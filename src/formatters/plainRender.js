@@ -1,60 +1,43 @@
 import {
   isNull,
-  isObject,
 } from 'lodash';
 
-const getTemplate = (status, values) => {
-  if (status === 'added') {
-    const [filledValue] = values.filter((value) => !isNull(value));
-    if (isObject(filledValue)) {
-      return 'was added with value: [complex value]';
-    }
-
-    if (typeof filledValue === 'string') {
-      return `was added with value: '${filledValue}'`;
-    }
-
-    return `was added with value: ${filledValue}`;
+const getPartByType = (type, value) => {
+  switch (type) {
+    case 'object':
+      return '[complex value]';
+    case 'string':
+      return `'${value}'`;
+    default:
+      return value;
   }
+};
 
-  if (status === 'removed') {
-    return 'was deleted';
+const mapper = (value) => {
+  const type = typeof value;
+  return getPartByType(type, value);
+};
+
+const getStringByStatus = (values) => {
+  const filledValues = values.filter((value) => !isNull(value));
+  const lastPart = filledValues.map(mapper);
+
+  return lastPart;
+};
+
+const getStringTemplate = (status, values) => {
+  switch (status) {
+    case 'added':
+      return `was added with value: ${getStringByStatus(values)}`;
+    case 'removed':
+      return 'was deleted';
+    case 'changed': {
+      const [before, after] = getStringByStatus(values);
+      return `was changed from ${before} to ${after}`;
+    }
+    default:
+      return null;
   }
-
-  if (status === 'changed') {
-    const [firstValue, secondValue] = values;
-    if (isObject(firstValue)) {
-      if (typeof secondValue === 'string') {
-        return `was changed from [complex value] to '${secondValue}'`;
-      }
-
-      return `was changed from [complex value] to ${secondValue}`;
-    }
-
-    if (isObject(secondValue)) {
-      if (typeof firstValue === 'string') {
-        return `was changed from '${firstValue}' to [complex value]`;
-      }
-
-      return `was changed from ${firstValue} to [complex value]`;
-    }
-
-    if (typeof firstValue === 'string' && typeof secondValue === 'string') {
-      return `was changed from '${firstValue}' to '${secondValue}'`;
-    }
-
-    if (typeof firstValue === 'string') {
-      return `was changed from '${firstValue}' to ${secondValue}`;
-    }
-
-    if (typeof secondValue === 'string') {
-      return `was changed from ${firstValue} to '${secondValue}'`;
-    }
-
-    return `was changed from ${firstValue} to ${secondValue}`;
-  }
-
-  return null;
 };
 
 const render = (ast) => {
@@ -71,14 +54,14 @@ const render = (ast) => {
         const newNames = [...names, name];
         return [...acc, iter(children, newNames)];
       }
-
       if (status === 'unchanged') {
         return acc;
       }
 
       const currentNames = [...names, name];
+      const nextString = `Property '${currentNames.join('.')}' ${getStringTemplate(status, values)}`;
 
-      return [...acc, `Property '${currentNames.join('.')}' ${getTemplate(status, values)}`];
+      return [...acc, nextString];
     }, []);
 
     return content.join('\n');
