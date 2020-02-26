@@ -2,6 +2,7 @@ import getAst from './ast';
 import parse from './parsers';
 import tree from './formatters/treeRender';
 import plain from './formatters/plainRender';
+import json from './formatters/jsonRender';
 
 const getDiffString = (firstConfig, secondConfig, format) => {
   const contentBefore = parse(firstConfig);
@@ -12,6 +13,7 @@ const getDiffString = (firstConfig, secondConfig, format) => {
   const renders = {
     tree,
     plain,
+    json,
   };
 
   const render = renders[format];

@@ -14,10 +14,10 @@ Property 'group2' was deleted
 Property 'group3' was added with value: [complex value]`;
 
 test.each([
-  [parse('__fixtures__/before.json'), parse('__fixtures__/after.json')],
-  [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
   [parse('__fixtures__/before.ini'), parse('__fixtures__/after.ini')],
-])('getDiffString(%o, %o)', (obj1, obj2) => {
+  [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
+  [parse('__fixtures__/before.json'), parse('__fixtures__/after.json')],
+])('getDiff(%o, %o)', (obj1, obj2) => {
   const ast = getAst(obj1, obj2);
   const received = render(ast);
   expect(received).toMatch(expected);

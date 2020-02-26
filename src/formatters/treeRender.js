@@ -5,27 +5,14 @@ import {
 } from 'lodash';
 import getAst from '../ast';
 
-const getFilledValue = (arr) => {
-  const [firstValue, secondValue] = arr;
-
-  if (isNull(firstValue)) {
-    return secondValue;
-  }
-  if (isNull(secondValue)) {
-    return firstValue;
-  }
-
-  return arr;
-};
-
 const getSign = (status) => {
   switch (status) {
     case 'added':
-      return ['+ '];
+      return ['+ ', null];
     case 'removed':
-      return ['- '];
+      return ['- ', null];
     case 'unchanged':
-      return ['  '];
+      return ['  ', null];
     default:
       break;
   }
@@ -46,42 +33,78 @@ const render = (ast) => {
       const indent = `${'    '.repeat(count)}`;
       const sign = getSign(status);
 
+      const openingBracket = '{';
+      const closingBracket = '}';
+
+      const [signBefore, signAfter] = sign;
+
       if (!isNull(children)) {
-        return [...acc, `${indent}  ${sign}${name}: {`, iter(children, count + 1), `${indent}    }`];
+        const value = iter(children, count + 1);
+        return [
+          ...acc,
+          `${indent}  ${signBefore}${name}: ${openingBracket}`,
+          value,
+          `${indent}    ${closingBracket}`,
+        ];
       }
 
-      if (sign.length === 2) {
-        const [signBefore, signAfter] = sign;
-        const [before, after] = values;
+      const [valBefore, valAfter] = values;
 
-        if (isObject(before)) {
-          const astFromValue = getAst(before, before);
-          return [...acc, `${indent}  ${signBefore}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`, `${indent}  ${signAfter}${name}: ${after}`];
+      if (!sign.includes(null)) {
+        if (isObject(valBefore)) {
+          const astFromValue = getAst(valBefore, valBefore);
+          const value = iter(astFromValue, count + 1);
+          return [
+            ...acc,
+            `${indent}  ${signBefore}${name}: ${openingBracket}`,
+            value,
+            `${indent}    ${closingBracket}`,
+            `${indent}  ${signAfter}${name}: ${valAfter}`,
+          ];
         }
-        if (isObject(after)) {
-          const astFromValue = getAst(after, after);
-          return [...acc, `${indent}  ${signBefore}${name}: ${before}`, `${indent}  ${signAfter}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`];
+        if (isObject(valAfter)) {
+          const astFromValue = getAst(valAfter, valAfter);
+          const value = iter(astFromValue, count + 1);
+          return [
+            ...acc,
+            `${indent}  ${signBefore}${name}: ${valBefore}`,
+            `${indent}  ${signAfter}${name}: ${openingBracket}`,
+            value,
+            `${indent}    ${closingBracket}`,
+          ];
         }
 
-        return [...acc, `${indent}  ${signBefore}${name}: ${before}`, `${indent}  ${signAfter}${name}: ${after}`];
+        return [
+          ...acc,
+          `${indent}  ${signBefore}${name}: ${valBefore}`,
+          `${indent}  ${signAfter}${name}: ${valAfter}`,
+        ];
       }
 
-      const [signStr] = sign;
-      const filledValue = getFilledValue(values);
+      const [filledValue] = values.filter((value) => !isNull(value));
 
       if (isObject(filledValue)) {
         const astFromValue = getAst(filledValue, filledValue);
-        return [...acc, `${indent}  ${signStr}${name}: {`, iter(astFromValue, count + 1), `${indent}    }`];
+        const value = iter(astFromValue, count + 1);
+        return [
+          ...acc,
+          `${indent}  ${signBefore}${name}: ${openingBracket}`,
+          value,
+          `${indent}    ${closingBracket}`,
+        ];
       }
 
-      return [...acc, `${indent}  ${signStr}${name}: ${filledValue}`];
+      return [
+        ...acc,
+        `${indent}  ${signBefore}${name}: ${filledValue}`,
+      ];
     }, []);
 
     return diffElementsArray;
   };
 
-  const flatDiffElements = flattenDeep(iter(ast, 0));
-  const result = `{\n${flatDiffElements.join('\n')}\n}`;
+  const flatElementsArr = flattenDeep(iter(ast, 0));
+  const result = `{\n${flatElementsArr.join('\n')}\n}`;
 
   return result;
 };

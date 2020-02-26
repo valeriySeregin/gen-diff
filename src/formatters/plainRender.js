@@ -3,18 +3,9 @@ import {
   isObject,
 } from 'lodash';
 
-const getNotNull = (arr) => {
-  const [firstValue, secondValue] = arr;
-  if (isNull(firstValue)) {
-    return secondValue;
-  }
-
-  return firstValue;
-};
-
 const getTemplate = (status, values) => {
   if (status === 'added') {
-    const filledValue = getNotNull(values);
+    const [filledValue] = values.filter((value) => !isNull(value));
     if (isObject(filledValue)) {
       return 'was added with value: [complex value]';
     }
@@ -77,7 +68,8 @@ const render = (ast) => {
       } = subTree;
 
       if (!isNull(children)) {
-        return [...acc, iter(children, [...names, name])];
+        const newNames = [...names, name];
+        return [...acc, iter(children, newNames)];
       }
 
       if (status === 'unchanged') {
