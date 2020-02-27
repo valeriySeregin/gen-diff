@@ -4,6 +4,8 @@ import {
   isUndefined,
 } from 'lodash';
 
+const isBothValuesObjects = (val1, val2) => isObject(val1) && isObject(val2);
+
 const compareValues = (before, after) => {
   if (isUndefined(before) && !isUndefined(after)) {
     return 'added';
@@ -19,14 +21,18 @@ const compareValues = (before, after) => {
 };
 
 const getValuesRightOrder = (before, after, status) => {
-  if (status === 'added') {
-    return [null, after];
+  switch (status) {
+    case 'added':
+      return [null, after];
+    case 'removed':
+      return [before, null];
+    case 'changed':
+      return [before, after];
+    case 'unchanged':
+      return [before, null];
+    default:
+      throw new Error(`Unknown status ${status}!`);
   }
-  if (status === 'changed') {
-    return [before, after];
-  }
-
-  return [before, null];
 };
 
 const getAst = (before, after) => {
@@ -35,21 +41,11 @@ const getAst = (before, after) => {
   const ast = uniqPropertiesNames.reduce((acc, name) => {
     const valueBefore = before[name];
     const valueAfter = after[name];
+    const predicate = isBothValuesObjects(valueBefore, valueAfter);
 
-    if (isObject(valueBefore) && isObject(valueAfter)) {
-      return [
-        ...acc,
-        {
-          name,
-          status: 'unchanged',
-          values: null,
-          children: getAst(valueBefore, valueAfter),
-        },
-      ];
-    }
-
-    const status = compareValues(valueBefore, valueAfter);
-    const values = getValuesRightOrder(valueBefore, valueAfter, status);
+    const status = predicate ? 'unchanged' : compareValues(valueBefore, valueAfter);
+    const values = predicate ? null : getValuesRightOrder(valueBefore, valueAfter, status);
+    const children = predicate ? getAst(valueBefore, valueAfter) : null;
 
     return [
       ...acc,
@@ -57,7 +53,7 @@ const getAst = (before, after) => {
         name,
         status,
         values,
-        children: null,
+        children,
       },
     ];
   }, []);
