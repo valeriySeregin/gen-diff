@@ -8,102 +8,77 @@ import getAst from '../ast';
 const getSign = (status) => {
   switch (status) {
     case 'added':
-      return ['+ ', null];
+      return ['+ '];
     case 'removed':
-      return ['- ', null];
+      return ['- '];
     case 'unchanged':
-      return ['  ', null];
+      return ['  '];
+    case 'changed':
+      return ['- ', '+ '];
     default:
-      break;
+      throw new Error(`Unknown status ${status}!`);
   }
-
-  return ['- ', '+ '];
 };
 
-const render = (ast) => {
-  const iter = (tree, count) => {
-    const diffElementsArray = tree.reduce((acc, item) => {
-      const {
-        name,
-        status,
-        values,
-        children,
-      } = item;
 
-      const indent = `${'    '.repeat(count)}`;
-      const sign = getSign(status);
+const generateStringElements = (tree, deep) => {
+  const diffElementsArray = tree.reduce((acc, subtree) => {
+    const {
+      name,
+      status,
+      values,
+      children,
+    } = subtree;
 
-      const openingBracket = '{';
-      const closingBracket = '}';
+    const indent = `${'    '.repeat(deep)}`;
+    const signs = getSign(status);
 
-      const [signBefore, signAfter] = sign;
-
-      if (!isNull(children)) {
-        const value = iter(children, count + 1);
-        return [
-          ...acc,
-          `${indent}  ${signBefore}${name}: ${openingBracket}`,
-          value,
-          `${indent}    ${closingBracket}`,
-        ];
-      }
-
-      const [valBefore, valAfter] = values;
-
-      if (!sign.includes(null)) {
-        if (isObject(valBefore)) {
-          const astFromValue = getAst(valBefore, valBefore);
-          const value = iter(astFromValue, count + 1);
-          return [
-            ...acc,
-            `${indent}  ${signBefore}${name}: ${openingBracket}`,
-            value,
-            `${indent}    ${closingBracket}`,
-            `${indent}  ${signAfter}${name}: ${valAfter}`,
-          ];
-        }
-        if (isObject(valAfter)) {
-          const astFromValue = getAst(valAfter, valAfter);
-          const value = iter(astFromValue, count + 1);
-          return [
-            ...acc,
-            `${indent}  ${signBefore}${name}: ${valBefore}`,
-            `${indent}  ${signAfter}${name}: ${openingBracket}`,
-            value,
-            `${indent}    ${closingBracket}`,
-          ];
-        }
-
-        return [
-          ...acc,
-          `${indent}  ${signBefore}${name}: ${valBefore}`,
-          `${indent}  ${signAfter}${name}: ${valAfter}`,
-        ];
-      }
-
-      const [filledValue] = values.filter((value) => !isNull(value));
-
-      if (isObject(filledValue)) {
-        const astFromValue = getAst(filledValue, filledValue);
-        const value = iter(astFromValue, count + 1);
-        return [
-          ...acc,
-          `${indent}  ${signBefore}${name}: ${openingBracket}`,
-          value,
-          `${indent}    ${closingBracket}`,
-        ];
-      }
-
-      return [
-        ...acc,
-        `${indent}  ${signBefore}${name}: ${filledValue}`,
+    if (!isNull(children)) {
+      const formattedAst = generateStringElements(children, deep + 1);
+      const partsArr = [
+        `${indent}  ${signs}${name}: {`,
+        formattedAst,
+        `${indent}    }`,
       ];
-    }, []);
 
-    return diffElementsArray;
-  };
+      return [...acc, ...partsArr];
+    }
 
-  const flatElementsArr = flattenDeep(iter(ast, 0));
+    const filledValues = values.filter((value) => !isNull(value));
+
+    const stringParts = filledValues.map((element, i) => {
+      const marker = signs[i];
+
+      if (isObject(element)) {
+        const astFromElement = getAst(element, element);
+        const formattedAst = generateStringElements(astFromElement, deep + 1);
+        const partsArr = [
+          `${indent}  ${marker}${name}: {`,
+          formattedAst,
+          `${indent}    }`,
+        ];
+
+        return partsArr;
+      }
+
+      const partsArr = [
+        `${indent}  ${marker}${name}: ${element}`,
+      ];
+
+      return partsArr;
+    });
+
+    return [...acc, ...stringParts];
+  }, []);
+
+  return diffElementsArray;
+};
+
+
+const render = (ast) => {
+  const initialDeep = 0;
+  const stringElements = generateStringElements(ast, initialDeep);
+  const flatElementsArr = flattenDeep(stringElements);
   const result = `{\n${flatElementsArr.join('\n')}\n}`;
 
   return result;
