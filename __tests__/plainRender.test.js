@@ -1,6 +1,4 @@
-import parse from '../src/parsers';
-import buildAst from '../src/ast';
-import render from '../src/formatters/plain';
+import generateDiff from '../src';
 
 const expected = `Property 'common.setting2' was deleted
 Property 'common.setting3' was changed from true to [complex value]
@@ -14,11 +12,10 @@ Property 'group2' was deleted
 Property 'group3' was added with value: [complex value]`;
 
 test.each([
-  [parse('__fixtures__/before.ini'), parse('__fixtures__/after.ini')],
-  [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
-  [parse('__fixtures__/before.json'), parse('__fixtures__/after.json')],
-])('getDiff(%o, %o)', (obj1, obj2) => {
-  const ast = buildAst(obj1, obj2);
-  const received = render(ast);
+  ['__fixtures__/before.ini', '__fixtures__/after.ini', 'plain'],
+  ['__fixtures__/before.yml', '__fixtures__/after.yml', 'plain'],
+  ['__fixtures__/before.json', '__fixtures__/after.json', 'plain'],
+])('getDiff(%s, %s, %s)', (path1, path2, format) => {
+  const received = generateDiff(path1, path2, format);
   expect(received).toMatch(expected);
 });

@@ -1,12 +1,9 @@
 import path from 'path';
-import fs from 'fs';
 import yaml from 'js-yaml';
 import ini from 'ini';
 
-const parse = (filename) => {
-  const pathToFile = path.join(process.cwd(), filename);
-  const fileContent = fs.readFileSync(pathToFile, 'utf-8');
-  const extension = path.extname(pathToFile);
+const parse = (fileData, config) => {
+  const extension = path.extname(config);
 
   const parsers = {
     '.json': (content) => JSON.parse(content),
@@ -16,7 +13,7 @@ const parse = (filename) => {
 
   const parseFile = parsers[extension];
 
-  return parseFile(fileContent);
+  return parseFile(fileData);
 };
 
 export default parse;

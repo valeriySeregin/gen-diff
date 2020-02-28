@@ -1,14 +1,26 @@
-import getAst from './ast';
+import fs from 'fs';
+import path from 'path';
+import buildAst from './ast';
 import parse from './parsers';
 import tree from './formatters/tree';
 import plain from './formatters/plain';
 import json from './formatters/json';
 
-const generateDiff = (firstConfig, secondConfig, format) => {
-  const contentBefore = parse(firstConfig);
-  const contentAfter = parse(secondConfig);
+const readFile = (filepath) => {
+  const fullPath = path.resolve(process.cwd(), filepath);
+  const data = fs.readFileSync(fullPath, 'utf-8');
 
-  const ast = getAst(contentBefore, contentAfter);
+  return data;
+};
+
+export default (firstConfig, secondConfig, format = 'tree') => {
+  const data1 = readFile(firstConfig);
+  const data2 = readFile(secondConfig);
+
+  const contentBefore = parse(data1, firstConfig);
+  const contentAfter = parse(data2, secondConfig);
+
+  const ast = buildAst(contentBefore, contentAfter);
 
   const renders = {
     tree,
@@ -21,5 +33,3 @@ const generateDiff = (firstConfig, secondConfig, format) => {
 
   return diff;
 };
-
-export default generateDiff;

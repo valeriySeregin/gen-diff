@@ -1,6 +1,4 @@
-import parse from '../src/parsers';
-import buildAst from '../src/ast';
-import render from '../src/formatters/json';
+import generateDiff from '../src';
 
 const expected = [
   {
@@ -69,12 +67,11 @@ const expected = [
 ];
 
 test.each([
-  [parse('__fixtures__/before.json'), parse('__fixtures__/after.json')],
-  [parse('__fixtures__/before.ini'), parse('__fixtures__/after.ini')],
-  [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
-])('getDiffString(%o, %o)', (obj1, obj2) => {
-  const ast = buildAst(obj1, obj2);
-  const receivedString = render(ast);
-  const received = JSON.parse(receivedString);
+  ['__fixtures__/before.json', '__fixtures__/after.json', 'json'],
+  ['__fixtures__/before.ini', '__fixtures__/after.ini', 'json'],
+  ['__fixtures__/before.yml', '__fixtures__/after.yml', 'json'],
+])('getDiff(%s, %s, %s)', (path1, path2, format) => {
+  const receivedDiff = generateDiff(path1, path2, format);
+  const received = JSON.parse(receivedDiff);
   expect(received).toStrictEqual(expected);
 });
