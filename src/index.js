@@ -1,10 +1,10 @@
 import getAst from './ast';
 import parse from './parsers';
-import tree from './formatters/treeRender';
-import plain from './formatters/plainRender';
-import json from './formatters/jsonRender';
+import tree from './formatters/tree';
+import plain from './formatters/plain';
+import json from './formatters/json';
 
-const getDiffString = (firstConfig, secondConfig, format) => {
+const generateDiff = (firstConfig, secondConfig, format) => {
   const contentBefore = parse(firstConfig);
   const contentAfter = parse(secondConfig);
 
@@ -22,4 +22,4 @@ const getDiffString = (firstConfig, secondConfig, format) => {
   return diff;
 };
 
-export default getDiffString;
+export default generateDiff;

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import program from 'commander';
-import getDiffString from '..';
+import generateDiff from '..';
 
 program
   .version('0.6.0')
@@ -9,7 +9,7 @@ program
   .option('-f, --format [type]', 'output format', 'tree')
   .arguments('<firstConfig> <secondConfig>')
   .action((firstConfig, secondConfig, options) => {
-    const diffString = getDiffString(firstConfig, secondConfig, options.format);
+    const diffString = generateDiff(firstConfig, secondConfig, options.format);
     console.log(diffString);
   });
 

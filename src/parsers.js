@@ -8,13 +8,13 @@ const parse = (filename) => {
   const fileContent = fs.readFileSync(pathToFile, 'utf-8');
   const extension = path.extname(pathToFile);
 
-  const extensionsDict = {
-    '.json': (file) => JSON.parse(file),
-    '.yml': (file) => yaml.safeLoad(file),
-    '.ini': (file) => ini.parse(file),
+  const parsers = {
+    '.json': (content) => JSON.parse(content),
+    '.yml': (content) => yaml.safeLoad(content),
+    '.ini': (content) => ini.parse(content),
   };
 
-  const parseFile = extensionsDict[extension];
+  const parseFile = parsers[extension];
 
   return parseFile(fileContent);
 };

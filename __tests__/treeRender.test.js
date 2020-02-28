@@ -1,6 +1,6 @@
 import parse from '../src/parsers';
-import getAst from '../src/ast';
-import render from '../src/formatters/treeRender';
+import buildAst from '../src/ast';
+import render from '../src/formatters/tree';
 
 const expected = `{
     common: {
@@ -42,7 +42,7 @@ test.each([
   [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
   [parse('__fixtures__/before.ini'), parse('__fixtures__/after.ini')],
 ])('getDiffString(%o, %o)', (obj1, obj2) => {
-  const ast = getAst(obj1, obj2);
+  const ast = buildAst(obj1, obj2);
   const received = render(ast);
   expect(received).toMatch(expected);
 });

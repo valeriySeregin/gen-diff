@@ -1,71 +1,71 @@
-import getAst from '../src/ast';
+import buildAst from '../src/ast';
 
 const expected = [
   {
     children:
     [
       {
-        children: null, name: 'setting1', status: 'unchanged', values: ['Value 1', null],
+        children: null, name: 'setting1', state: 'unchanged', values: ['Value 1', null],
       },
       {
-        children: null, name: 'setting2', status: 'removed', values: [200, null],
+        children: null, name: 'setting2', state: 'deleted', values: [200, null],
       },
       {
-        children: null, name: 'setting3', status: 'changed', values: [true, { key: 'value' }],
+        children: null, name: 'setting3', state: 'changed', values: [true, { key: 'value' }],
       },
       {
         children:
         [
           {
-            children: null, name: 'key', status: 'unchanged', values: ['value', null],
+            children: null, name: 'key', state: 'unchanged', values: ['value', null],
           },
           {
-            children: null, name: 'ops', status: 'added', values: [null, 'vops'],
+            children: null, name: 'ops', state: 'added', values: [null, 'vops'],
           },
         ],
         name: 'setting6',
-        status: 'unchanged',
+        state: 'unchanged',
         values: null,
       },
       {
-        children: null, name: 'follow', status: 'added', values: [null, false],
+        children: null, name: 'follow', state: 'added', values: [null, false],
       },
       {
-        children: null, name: 'setting4', status: 'added', values: [null, 'blah blah'],
+        children: null, name: 'setting4', state: 'added', values: [null, 'blah blah'],
       },
       {
-        children: null, name: 'setting5', status: 'added', values: [null, { key5: 'value5' }],
+        children: null, name: 'setting5', state: 'added', values: [null, { key5: 'value5' }],
       },
     ],
     name: 'common',
-    status: 'unchanged',
+    state: 'unchanged',
     values: null,
   },
   {
     children:
     [{
-      children: null, name: 'baz', status: 'changed', values: ['bas', 'bars'],
+      children: null, name: 'baz', state: 'changed', values: ['bas', 'bars'],
     },
     {
-      children: null, name: 'foo', status: 'unchanged', values: ['bar', null],
+      children: null, name: 'foo', state: 'unchanged', values: ['bar', null],
     },
     {
-      children: null, name: 'nest', status: 'changed', values: [{ key: 'value' }, 'str'],
+      children: null, name: 'nest', state: 'changed', values: [{ key: 'value' }, 'str'],
     },
     ],
     name: 'group1',
-    status: 'unchanged',
+    state: 'unchanged',
     values: null,
   },
   {
-    children: null, name: 'group2', status: 'removed', values: [{ abc: 12345 }, null],
+    children: null, name: 'group2', state: 'deleted', values: [{ abc: 12345 }, null],
   },
   {
-    children: null, name: 'group3', status: 'added', values: [null, { fee: 100500 }],
+    children: null, name: 'group3', state: 'added', values: [null, { fee: 100500 }],
   },
 ];
 
-const before = {
+const objBefore = {
   common: {
     setting1: 'Value 1',
     setting2: 200,
@@ -86,7 +86,7 @@ const before = {
   },
 };
 
-const after = {
+const objAfter = {
   common: {
     follow: false,
     setting1: 'Value 1',
@@ -112,7 +112,7 @@ const after = {
   },
 };
 
-const received = getAst(before, after);
+const received = buildAst(objBefore, objAfter);
 
 test('generate AST', () => {
   expect(received).toEqual(expected);

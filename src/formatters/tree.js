@@ -3,20 +3,20 @@ import {
   flattenDeep,
   isObject,
 } from 'lodash';
-import getAst from '../ast';
+import buildAst from '../ast';
 
-const getSign = (status) => {
-  switch (status) {
+const getMarkers = (state) => {
+  switch (state) {
     case 'added':
       return ['+ '];
-    case 'removed':
+    case 'deleted':
       return ['- '];
     case 'unchanged':
       return ['  '];
     case 'changed':
       return ['- ', '+ '];
     default:
-      throw new Error(`Unknown status ${status}!`);
+      throw new Error(`Unknown state ${state}!`);
   }
 };
 
@@ -25,18 +25,19 @@ const generateStringElements = (tree, deep) => {
   const diffElementsArray = tree.reduce((acc, subtree) => {
     const {
       name,
-      status,
+      state,
       values,
       children,
     } = subtree;
 
     const indent = `${'    '.repeat(deep)}`;
-    const signs = getSign(status);
+    const markers = getMarkers(state);
 
     if (!isNull(children)) {
       const formattedAst = generateStringElements(children, deep + 1);
+      const [marker] = markers;
       const partsArr = [
-        `${indent}  ${signs}${name}: {`,
+        `${indent}  ${marker}${name}: {`,
         formattedAst,
         `${indent}    }`,
       ];
@@ -46,29 +47,29 @@ const generateStringElements = (tree, deep) => {
 
     const filledValues = values.filter((value) => !isNull(value));
 
-    const stringParts = filledValues.map((element, i) => {
-      const marker = signs[i];
+    const stringElements = filledValues.map((element, i) => {
+      const marker = markers[i];
 
       if (isObject(element)) {
-        const astFromElement = getAst(element, element);
+        const astFromElement = buildAst(element, element);
         const formattedAst = generateStringElements(astFromElement, deep + 1);
-        const partsArr = [
+        const elementsArr = [
           `${indent}  ${marker}${name}: {`,
           formattedAst,
           `${indent}    }`,
         ];
 
-        return partsArr;
+        return elementsArr;
       }
 
-      const partsArr = [
+      const elementsArr = [
         `${indent}  ${marker}${name}: ${element}`,
       ];
 
-      return partsArr;
+      return elementsArr;
     });
 
-    return [...acc, ...stringParts];
+    return [...acc, ...stringElements];
   }, []);
 
   return diffElementsArray;

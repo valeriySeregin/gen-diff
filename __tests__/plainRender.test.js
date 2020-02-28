@@ -1,6 +1,6 @@
 import parse from '../src/parsers';
-import getAst from '../src/ast';
-import render from '../src/formatters/plainRender';
+import buildAst from '../src/ast';
+import render from '../src/formatters/plain';
 
 const expected = `Property 'common.setting2' was deleted
 Property 'common.setting3' was changed from true to [complex value]
@@ -18,7 +18,7 @@ test.each([
   [parse('__fixtures__/before.yml'), parse('__fixtures__/after.yml')],
   [parse('__fixtures__/before.json'), parse('__fixtures__/after.json')],
 ])('getDiff(%o, %o)', (obj1, obj2) => {
-  const ast = getAst(obj1, obj2);
+  const ast = buildAst(obj1, obj2);
   const received = render(ast);
   expect(received).toMatch(expected);
 });

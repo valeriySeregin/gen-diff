@@ -6,52 +6,52 @@ import {
 
 const isBothValuesObjects = (val1, val2) => isObject(val1) && isObject(val2);
 
-const compareValues = (before, after) => {
-  if (isUndefined(before) && !isUndefined(after)) {
+const compareValues = (valueBefore, valueAfter) => {
+  if (isUndefined(valueBefore) && !isUndefined(valueAfter)) {
     return 'added';
   }
-  if (!isUndefined(before) && isUndefined(after)) {
-    return 'removed';
+  if (!isUndefined(valueBefore) && isUndefined(valueAfter)) {
+    return 'deleted';
   }
-  if (before === after) {
+  if (valueBefore === valueAfter) {
     return 'unchanged';
   }
 
   return 'changed';
 };
 
-const getValuesRightOrder = (before, after, status) => {
-  switch (status) {
+const getRightOrderOfValues = (valueBefore, valueAfter, state) => {
+  switch (state) {
     case 'added':
-      return [null, after];
-    case 'removed':
-      return [before, null];
+      return [null, valueAfter];
+    case 'deleted':
+      return [valueBefore, null];
     case 'changed':
-      return [before, after];
+      return [valueBefore, valueAfter];
     case 'unchanged':
-      return [before, null];
+      return [valueBefore, null];
     default:
-      throw new Error(`Unknown status ${status}!`);
+      throw new Error(`Unknown state ${state}!`);
   }
 };
 
-const getAst = (before, after) => {
-  const uniqPropertiesNames = union(Object.keys(before), Object.keys(after));
+const buildAst = (objectBefore, objectAfter) => {
+  const uniqPropertiesNames = union(Object.keys(objectBefore), Object.keys(objectAfter));
 
   const ast = uniqPropertiesNames.reduce((acc, name) => {
-    const valueBefore = before[name];
-    const valueAfter = after[name];
+    const valueBefore = objectBefore[name];
+    const valueAfter = objectAfter[name];
     const predicate = isBothValuesObjects(valueBefore, valueAfter);
 
-    const status = predicate ? 'unchanged' : compareValues(valueBefore, valueAfter);
-    const values = predicate ? null : getValuesRightOrder(valueBefore, valueAfter, status);
-    const children = predicate ? getAst(valueBefore, valueAfter) : null;
+    const state = predicate ? 'unchanged' : compareValues(valueBefore, valueAfter);
+    const values = predicate ? null : getRightOrderOfValues(valueBefore, valueAfter, state);
+    const children = predicate ? buildAst(valueBefore, valueAfter) : null;
 
     return [
       ...acc,
       {
         name,
-        status,
+        state,
         values,
         children,
       },
@@ -61,4 +61,4 @@ const getAst = (before, after) => {
   return ast;
 };
 
-export default getAst;
+export default buildAst;
