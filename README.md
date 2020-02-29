@@ -3,15 +3,15 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/f56e0c25e4f363027abd/maintainability)](https://codeclimate.com/github/valeriySeregin/backend-project-lvl2/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/f56e0c25e4f363027abd/test_coverage)](https://codeclimate.com/github/valeriySeregin/backend-project-lvl2/test_coverage)
 
-## gendiff is a simple CLI util returning diff of two files of different formats (json, yaml, ini). You can clone this repository and install util to check how it works with next commands:
-### make install
-### npm link
+### gendiff is a simple CLI util returning diff of two files of different formats (json, yaml, ini). You can clone this repository and install util to check how it works with next commands:
+#### make install
+#### npm link
 
 # Processing help and version flags
-<script id="asciicast-N04uqmrkvbD8rWsQR5t89J6YZ" src="https://asciinema.org/a/N04uqmrkvbD8rWsQR5t89J6YZ.js" async></script>
+[![asciicast](https://asciinema.org/a/N04uqmrkvbD8rWsQR5t89J6YZ.svg)](https://asciinema.org/a/N04uqmrkvbD8rWsQR5t89J6YZ)
 
 # Handling relative and absolute paths to files
-<script id="asciicast-zva3ENa7wysXp0AXjBbj8ZfLA" src="https://asciinema.org/a/zva3ENa7wysXp0AXjBbj8ZfLA.js" async></script>
+[![asciicast](https://asciinema.org/a/zva3ENa7wysXp0AXjBbj8ZfLA.svg)](https://asciinema.org/a/zva3ENa7wysXp0AXjBbj8ZfLA)
 
 # Processing format flag
-<script id="asciicast-5RrKial5v5VuLwBgRqJ8Wqp4o" src="https://asciinema.org/a/5RrKial5v5VuLwBgRqJ8Wqp4o.js" async></script>
+[![asciicast](https://asciinema.org/a/5RrKial5v5VuLwBgRqJ8Wqp4o.svg)](https://asciinema.org/a/5RrKial5v5VuLwBgRqJ8Wqp4o)
