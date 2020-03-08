@@ -2,9 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import buildAst from './ast';
 import parse from './parsers';
-import tree from './formatters/tree';
-import plain from './formatters/plain';
-import json from './formatters/json';
+import render from './formatters';
 
 const readFile = (filepath) => {
   const fullPath = path.resolve(process.cwd(), filepath);
@@ -22,14 +20,8 @@ export default (firstConfig, secondConfig, format = 'tree') => {
 
   const ast = buildAst(contentBefore, contentAfter);
 
-  const renders = {
-    tree,
-    plain,
-    json,
-  };
-
-  const render = renders[format];
-  const diff = render(ast);
+  const getRenderedTree = render(format);
+  const diff = getRenderedTree(ast);
 
   return diff;
 };

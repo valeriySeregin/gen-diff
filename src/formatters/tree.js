@@ -20,7 +20,6 @@ const getMarkers = (state) => {
   }
 };
 
-
 const generateStringElements = (tree, deep) => {
   const diffElementsArray = tree.reduce((acc, subtree) => {
     const {
@@ -74,7 +73,6 @@ const generateStringElements = (tree, deep) => {
 
   return diffElementsArray;
 };
-
 
 const render = (ast) => {
   const initialDeep = 0;

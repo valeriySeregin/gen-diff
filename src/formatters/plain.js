@@ -55,8 +55,8 @@ const render = (ast) => {
       } = subTree;
 
       if (!isNull(children)) {
-        const newNames = [...names, name];
-        return [...acc, iter(children, newNames)];
+        const currentNames = [...names, name];
+        return [...acc, iter(children, currentNames)];
       }
       if (state === 'unchanged') {
         return acc;
