@@ -1,10 +1,7 @@
-import path from 'path';
 import yaml from 'js-yaml';
 import ini from 'ini';
 
-const parse = (fileData, config) => {
-  const extension = path.extname(config);
-
+export default (fileData, extension) => {
   const parsers = {
     '.json': (content) => JSON.parse(content),
     '.yml': (content) => yaml.safeLoad(content),
@@ -15,5 +12,3 @@ const parse = (fileData, config) => {
 
   return parseFile(fileData);
 };
-
-export default parse;
