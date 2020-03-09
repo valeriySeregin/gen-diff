@@ -1,15 +1,7 @@
-import fs from 'fs';
-import path from 'path';
 import buildAst from './ast';
 import parse from './parsers';
 import render from './formatters';
-
-const readFile = (filepath) => {
-  const fullPath = path.resolve(process.cwd(), filepath);
-  const data = fs.readFileSync(fullPath, 'utf-8');
-
-  return data;
-};
+import readFile from './utils';
 
 export default (firstConfig, secondConfig, format = 'tree') => {
   const data1 = readFile(firstConfig);
