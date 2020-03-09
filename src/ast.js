@@ -1,7 +1,5 @@
 import _ from 'lodash';
 
-const isBothValuesObjects = (val1, val2) => _.isObject(val1) && _.isObject(val2);
-
 const compareValues = (valueBefore, valueAfter) => {
   if (_.isUndefined(valueBefore) && !_.isUndefined(valueAfter)) {
     return 'added';
@@ -32,27 +30,30 @@ const getRightOrderOfValues = (valueBefore, valueAfter, state) => {
 };
 
 const buildAst = (objectBefore, objectAfter) => {
-  const uniqPropertiesNames = _.union(Object.keys(objectBefore), Object.keys(objectAfter));
+  const keys = _.union(Object.keys(objectBefore), Object.keys(objectAfter));
 
-  const ast = uniqPropertiesNames.reduce((acc, name) => {
+  const ast = keys.map((name) => {
     const valueBefore = objectBefore[name];
     const valueAfter = objectAfter[name];
-    const predicate = isBothValuesObjects(valueBefore, valueAfter);
 
-    const state = predicate ? 'unchanged' : compareValues(valueBefore, valueAfter);
-    const values = predicate ? null : getRightOrderOfValues(valueBefore, valueAfter, state);
-    const children = predicate ? buildAst(valueBefore, valueAfter) : null;
-
-    return [
-      ...acc,
-      {
+    if (_.isObject(valueBefore) && _.isObject(valueAfter)) {
+      return {
         name,
-        state,
-        values,
-        children,
-      },
-    ];
-  }, []);
+        state: 'unchanged',
+        values: null,
+        children: buildAst(valueBefore, valueAfter),
+      };
+    }
+
+    const state = compareValues(valueBefore, valueAfter);
+
+    return {
+      name,
+      state,
+      values: getRightOrderOfValues(valueBefore, valueAfter, state),
+      children: null,
+    };
+  });
 
   return ast;
 };
