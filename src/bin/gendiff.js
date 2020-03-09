@@ -9,8 +9,7 @@ program
   .option('-f, --format [type]', 'output format', 'tree')
   .arguments('<firstConfig> <secondConfig>')
   .action((firstConfig, secondConfig, options) => {
-    const diffString = generateDiff(firstConfig, secondConfig, options.format);
-    console.log(diffString);
+    console.log(generateDiff(firstConfig, secondConfig, options.format));
   });
 
 program.parse(process.argv);
