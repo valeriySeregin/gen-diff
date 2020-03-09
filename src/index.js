@@ -1,9 +1,9 @@
 import buildAst from './ast';
 import parse from './parsers';
-import render from './formatters';
+import render from './formatters/formatters';
 import readFile from './utils';
 
-export default (firstConfig, secondConfig, format = 'tree') => {
+export default (firstConfig, secondConfig, format) => {
   const data1 = readFile(firstConfig);
   const data2 = readFile(secondConfig);
 

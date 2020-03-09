@@ -1,6 +1,6 @@
-import tree from './formatters/tree';
-import plain from './formatters/plain';
-import json from './formatters/json';
+import tree from './tree';
+import plain from './plain';
+import json from './json';
 
 const render = (format) => {
   const formatters = {
