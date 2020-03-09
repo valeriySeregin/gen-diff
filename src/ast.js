@@ -1,16 +1,12 @@
-import {
-  union,
-  isObject,
-  isUndefined,
-} from 'lodash';
+import _ from 'lodash';
 
-const isBothValuesObjects = (val1, val2) => isObject(val1) && isObject(val2);
+const isBothValuesObjects = (val1, val2) => _.isObject(val1) && _.isObject(val2);
 
 const compareValues = (valueBefore, valueAfter) => {
-  if (isUndefined(valueBefore) && !isUndefined(valueAfter)) {
+  if (_.isUndefined(valueBefore) && !_.isUndefined(valueAfter)) {
     return 'added';
   }
-  if (!isUndefined(valueBefore) && isUndefined(valueAfter)) {
+  if (!_.isUndefined(valueBefore) && _.isUndefined(valueAfter)) {
     return 'deleted';
   }
   if (valueBefore === valueAfter) {
@@ -36,7 +32,7 @@ const getRightOrderOfValues = (valueBefore, valueAfter, state) => {
 };
 
 const buildAst = (objectBefore, objectAfter) => {
-  const uniqPropertiesNames = union(Object.keys(objectBefore), Object.keys(objectAfter));
+  const uniqPropertiesNames = _.union(Object.keys(objectBefore), Object.keys(objectAfter));
 
   const ast = uniqPropertiesNames.reduce((acc, name) => {
     const valueBefore = objectBefore[name];
