@@ -8,11 +8,11 @@ export default (firstConfig, secondConfig, format) => {
   const data1 = readFile(firstConfig);
   const data2 = readFile(secondConfig);
 
-  const extensionBefore = path.extname(firstConfig);
-  const extensionAfter = path.extname(secondConfig);
+  const dataTypeBefore = path.extname(firstConfig).slice(1);
+  const dataTypeAfter = path.extname(secondConfig).slice(1);
 
-  const contentBefore = parse(data1, extensionBefore);
-  const contentAfter = parse(data2, extensionAfter);
+  const contentBefore = parse(data1, dataTypeBefore);
+  const contentAfter = parse(data2, dataTypeAfter);
 
   const ast = buildAst(contentBefore, contentAfter);
 
