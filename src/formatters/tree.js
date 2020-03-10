@@ -15,33 +15,32 @@ const getMarkers = (state) => {
   }
 };
 
-const generateStringElements = (tree, depth) => {
-  const diffElementsArray = tree.map((subtree) => {
-    const {
-      name,
-      state,
-      values,
-      children,
-    } = subtree;
+const generateStringElements = (tree, depth) => tree.map((subtree) => {
+  const {
+    name,
+    state,
+    values,
+    children,
+  } = subtree;
 
-    const indent = (times) => '    '.repeat(times);
-    const markers = getMarkers(state);
+  const indent = (times) => '    '.repeat(times);
+  const markers = getMarkers(state);
 
-    if (!_.isNull(children)) {
-      const formattedAst = generateStringElements(children, depth + 1);
-      const [marker] = markers;
-      const elementsArr = [
-        `${indent(depth)}  ${marker}${name}: {`,
-        formattedAst,
-        `${indent(depth + 1)}}`,
-      ];
+  if (!_.isNull(children)) {
+    const formattedAst = generateStringElements(children, depth + 1);
+    const [marker] = markers;
+    const elementsArr = [
+      `${indent(depth)}  ${marker}${name}: {`,
+      formattedAst,
+      `${indent(depth + 1)}}`,
+    ];
 
-      return elementsArr;
-    }
+    return elementsArr;
+  }
 
-    const filledValues = values.filter((value) => !_.isNull(value));
-
-    const stringElements = filledValues.map((element, i) => {
+  const stringElements = values
+    .filter((value) => !_.isNull(value))
+    .map((element, i) => {
       const marker = markers[i];
 
       if (_.isObject(element)) {
@@ -64,11 +63,8 @@ const generateStringElements = (tree, depth) => {
       return elementsArr;
     });
 
-    return stringElements;
-  });
-
-  return diffElementsArray;
-};
+  return stringElements;
+});
 
 const render = (ast) => {
   const initialDepth = 0;
