@@ -1,9 +1,4 @@
-import {
-  isNull,
-  flattenDeep,
-  isObject,
-} from 'lodash';
-import buildAst from '../ast';
+import _ from 'lodash';
 
 const getMarkers = (state) => {
   switch (state) {
@@ -20,8 +15,8 @@ const getMarkers = (state) => {
   }
 };
 
-const generateStringElements = (tree, deep) => {
-  const diffElementsArray = tree.reduce((acc, subtree) => {
+const generateStringElements = (tree, depth) => {
+  const diffElementsArray = tree.map((subtree) => {
     const {
       name,
       state,
@@ -29,55 +24,56 @@ const generateStringElements = (tree, deep) => {
       children,
     } = subtree;
 
-    const indent = `${'    '.repeat(deep)}`;
+    const indent = (times) => '    '.repeat(times);
     const markers = getMarkers(state);
 
-    if (!isNull(children)) {
-      const formattedAst = generateStringElements(children, deep + 1);
+    if (!_.isNull(children)) {
+      const formattedAst = generateStringElements(children, depth + 1);
       const [marker] = markers;
-      const partsArr = [
-        `${indent}  ${marker}${name}: {`,
+      const elementsArr = [
+        `${indent(depth)}  ${marker}${name}: {`,
         formattedAst,
-        `${indent}    }`,
+        `${indent(depth + 1)}}`,
       ];
 
-      return [...acc, ...partsArr];
+      return elementsArr;
     }
 
-    const filledValues = values.filter((value) => !isNull(value));
+    const filledValues = values.filter((value) => !_.isNull(value));
 
     const stringElements = filledValues.map((element, i) => {
       const marker = markers[i];
 
-      if (isObject(element)) {
-        const astFromElement = buildAst(element, element);
-        const formattedAst = generateStringElements(astFromElement, deep + 1);
+      if (_.isObject(element)) {
+        const elementAsString = Object.entries(element)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join('');
         const elementsArr = [
-          `${indent}  ${marker}${name}: {`,
-          formattedAst,
-          `${indent}    }`,
+          `${indent(depth)}  ${marker}${name}: {`,
+          `${indent(depth + 2)}${elementAsString}`,
+          `${indent(depth + 1)}}`,
         ];
 
         return elementsArr;
       }
 
       const elementsArr = [
-        `${indent}  ${marker}${name}: ${element}`,
+        `${indent(depth)}  ${marker}${name}: ${element}`,
       ];
 
       return elementsArr;
     });
 
-    return [...acc, ...stringElements];
-  }, []);
+    return stringElements;
+  });
 
   return diffElementsArray;
 };
 
 const render = (ast) => {
-  const initialDeep = 0;
-  const stringElements = generateStringElements(ast, initialDeep);
-  const flatElementsArr = flattenDeep(stringElements);
+  const initialDepth = 0;
+  const stringElements = generateStringElements(ast, initialDepth);
+  const flatElementsArr = _.flattenDeep(stringElements);
   const result = `{\n${flatElementsArr.join('\n')}\n}`;
 
   return result;
