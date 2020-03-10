@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+const getTabIndent = (times) => '    '.repeat(times);
+
 const getMarkers = (state) => {
   switch (state) {
     case 'added':
@@ -15,6 +17,37 @@ const getMarkers = (state) => {
   }
 };
 
+const getStringElementsForChildren = (formattedAst, name, marker, depth) => [
+  `${getTabIndent(depth)}  ${marker}${name}: {`,
+  formattedAst,
+  `${getTabIndent(depth + 1)}}`,
+];
+
+const getStringElementsForValues = (values, name, markers, depth) => values
+  .filter((value) => !_.isNull(value))
+  .map((element, i) => {
+    const marker = markers[i];
+
+    if (_.isObject(element)) {
+      const elementAsString = Object.entries(element)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join('');
+      const elementsArr = [
+        `${getTabIndent(depth)}  ${marker}${name}: {`,
+        `${getTabIndent(depth + 2)}${elementAsString}`,
+        `${getTabIndent(depth + 1)}}`,
+      ];
+
+      return elementsArr;
+    }
+
+    const elementsArr = [
+      `${getTabIndent(depth)}  ${marker}${name}: ${element}`,
+    ];
+
+    return elementsArr;
+  });
+
 const generateStringElements = (tree, depth) => tree.map((subtree) => {
   const {
     name,
@@ -23,47 +56,16 @@ const generateStringElements = (tree, depth) => tree.map((subtree) => {
     children,
   } = subtree;
 
-  const indent = (times) => '    '.repeat(times);
   const markers = getMarkers(state);
 
   if (!_.isNull(children)) {
     const formattedAst = generateStringElements(children, depth + 1);
     const [marker] = markers;
-    const elementsArr = [
-      `${indent(depth)}  ${marker}${name}: {`,
-      formattedAst,
-      `${indent(depth + 1)}}`,
-    ];
 
-    return elementsArr;
+    return getStringElementsForChildren(formattedAst, name, marker, depth);
   }
 
-  const stringElements = values
-    .filter((value) => !_.isNull(value))
-    .map((element, i) => {
-      const marker = markers[i];
-
-      if (_.isObject(element)) {
-        const elementAsString = Object.entries(element)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join('');
-        const elementsArr = [
-          `${indent(depth)}  ${marker}${name}: {`,
-          `${indent(depth + 2)}${elementAsString}`,
-          `${indent(depth + 1)}}`,
-        ];
-
-        return elementsArr;
-      }
-
-      const elementsArr = [
-        `${indent(depth)}  ${marker}${name}: ${element}`,
-      ];
-
-      return elementsArr;
-    });
-
-  return stringElements;
+  return getStringElementsForValues(values, name, markers, depth);
 });
 
 const render = (ast) => {
