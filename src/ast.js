@@ -1,61 +1,34 @@
 import _ from 'lodash';
 
-const compareValues = (valueBefore, valueAfter) => {
-  if (_.isUndefined(valueBefore) && !_.isUndefined(valueAfter)) {
-    return 'added';
-  }
-  if (!_.isUndefined(valueBefore) && _.isUndefined(valueAfter)) {
-    return 'deleted';
-  }
-  if (valueBefore === valueAfter) {
-    return 'unchanged';
-  }
-
-  return 'changed';
-};
-
-const getRightOrderOfValues = (valueBefore, valueAfter, state) => {
-  switch (state) {
-    case 'added':
-      return [null, valueAfter];
-    case 'deleted':
-      return [valueBefore, null];
-    case 'changed':
-      return [valueBefore, valueAfter];
-    case 'unchanged':
-      return [valueBefore, null];
-    default:
-      throw new Error(`Unknown state ${state}!`);
-  }
-};
-
 const buildAst = (objectBefore, objectAfter) => {
   const keys = _.union(Object.keys(objectBefore), Object.keys(objectAfter));
 
-  const ast = keys.map((name) => {
-    const valueBefore = objectBefore[name];
-    const valueAfter = objectAfter[name];
-
-    if (_.isObject(valueBefore) && _.isObject(valueAfter)) {
-      return {
-        name,
-        state: 'unchanged',
-        values: null,
-        children: buildAst(valueBefore, valueAfter),
-      };
+  return keys.map((key) => {
+    const valueBefore = objectBefore[key];
+    const valueAfter = objectAfter[key];
+    if (valueBefore === valueAfter) {
+      return { key, state: 'unchanged', value: valueBefore };
     }
 
-    const state = compareValues(valueBefore, valueAfter);
+    if (!_.has(valueBefore, key) && _.has(valueAfter, key)) {
+      return { key, state: 'added', value: valueAfter };
+    }
+
+    if (_.has(valueBefore, key) && !_.has(valueAfter, key)) {
+      return { key, state: 'deleted', value: valueBefore };
+    }
+
+    if (_.isObject(valueBefore) && _.isObject(valueAfter)) {
+      return { key, state: 'nested', children: buildAst(valueBefore, valueAfter) };
+    }
 
     return {
-      name,
-      state,
-      values: getRightOrderOfValues(valueBefore, valueAfter, state),
-      children: null,
+      key,
+      state: 'changed',
+      oldValue: valueBefore,
+      newValue: valueAfter,
     };
   });
-
-  return ast;
 };
 
 export default buildAst;
