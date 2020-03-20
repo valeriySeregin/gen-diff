@@ -10,11 +10,11 @@ const buildAst = (objectBefore, objectAfter) => {
       return { key, state: 'unchanged', value: valueBefore };
     }
 
-    if (!_.has(valueBefore, key) && _.has(valueAfter, key)) {
+    if (_.isUndefined(valueBefore, key) && !_.isUndefined(valueAfter, key)) {
       return { key, state: 'added', value: valueAfter };
     }
 
-    if (_.has(valueBefore, key) && !_.has(valueAfter, key)) {
+    if (!_.isUndefined(valueBefore, key) && _.isUndefined(valueAfter, key)) {
       return { key, state: 'deleted', value: valueBefore };
     }
 
