@@ -1,71 +1,42 @@
 import _ from 'lodash';
 
-const getStringPartByType = (type, value) => {
-  switch (type) {
-    case 'object':
-      return '[complex value]';
-    case 'string':
-      return `'${value}'`;
-    default:
-      return value;
+const isComplex = (value) => {
+  if (_.isObject(value)) {
+    return '[complex value]';
   }
-};
 
-const mapValueIntoElement = (value) => {
-  const type = typeof value;
-  return getStringPartByType(type, value);
-};
-
-const getStringElementsFromValues = (values) => {
-  const filledValues = values.filter((value) => !_.isNull(value));
-  const elements = filledValues.map(mapValueIntoElement);
-
-  return elements;
-};
-
-const getString = (state, values, names) => {
-  const template = `Property '${names.join('.')}'`;
-  switch (state) {
-    case 'added': {
-      const [element] = getStringElementsFromValues(values);
-      return `${template} was added with value: ${element}`;
-    }
-    case 'deleted':
-      return `${template} was deleted`;
-    case 'changed': {
-      const [elementBefore, elementAfter] = getStringElementsFromValues(values);
-      return `${template} was changed from ${elementBefore} to ${elementAfter}`;
-    }
-    case 'unchanged':
-      return '';
-    default:
-      throw new Error(`Unknown state ${state}!`);
+  if (_.isString(value)) {
+    return `'${value}'`;
   }
+
+  return value;
 };
 
-const render = (ast) => {
-  const iter = (tree, oldNames) => {
-    const renderedAst = tree.map((subTree) => {
-      const {
-        name,
-        state,
-        values,
-        children,
-      } = subTree;
+const renderPlainDiff = (tree, path) => tree
+  .map((node) => {
+    const nestedPath = `${path}.${node.key}`;
+    const pathStr = _.trim(nestedPath, '.');
+    switch (node.state) {
+      case 'nested':
+        return renderPlainDiff(node.children, nestedPath);
+      case 'unchanged':
+        return '';
+      case 'changed': {
+        const oldVal = isComplex(node.oldValue);
+        const newVal = isComplex(node.newValue);
+        return `Property '${pathStr}' was changed from ${oldVal} to ${newVal}`;
+      }
+      case 'added':
+        return `Property '${pathStr}' was added with value: ${isComplex(node.value)}`;
+      case 'deleted':
+        return `Property '${pathStr}' was deleted`;
+      default:
+        throw new Error(`Error! '${node.state}' is invalid node state!`);
+    }
+  });
 
-      const newNames = [...oldNames, name];
-      const nextString = !_.isNull(children)
-        ? iter(children, newNames) : getString(state, values, newNames);
-
-      return nextString;
-    });
-
-    return renderedAst
-      .filter((string) => string !== '')
-      .join('\n');
-  };
-
-  return iter(ast, []);
-};
+const render = (ast) => _.flattenDeep(renderPlainDiff(ast, ''))
+  .filter((str) => str !== '')
+  .join('\n');
 
 export default render;
