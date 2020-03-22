@@ -12,31 +12,22 @@ const isComplex = (value) => {
   return value;
 };
 
-const renderPlainDiff = (tree, path) => tree
-  .map((node) => {
-    const nestedPath = `${path}.${node.key}`;
-    const pathStr = _.trim(nestedPath, '.');
-    switch (node.state) {
-      case 'nested':
-        return renderPlainDiff(node.children, nestedPath);
-      case 'unchanged':
-        return '';
-      case 'changed': {
-        const oldVal = isComplex(node.oldValue);
-        const newVal = isComplex(node.newValue);
-        return `Property '${pathStr}' was changed from ${oldVal} to ${newVal}`;
-      }
-      case 'added':
-        return `Property '${pathStr}' was added with value: ${isComplex(node.value)}`;
-      case 'deleted':
-        return `Property '${pathStr}' was deleted`;
-      default:
-        throw new Error(`Error! '${node.state}' is invalid node state!`);
-    }
-  });
+const generatePath = (parents, currentKey) => [...parents, currentKey].join('.');
 
-const render = (ast) => _.flattenDeep(renderPlainDiff(ast, ''))
-  .filter((str) => str !== '')
-  .join('\n');
+const mappings = {
+  nested: (node, parentKeys, iter) => iter(node.children, [...parentKeys, node.key]),
+  unchanged: () => '',
+  changed: (node, parentKeys) => {
+    const oldVal = isComplex(node.oldValue);
+    const newVal = isComplex(node.newValue);
+    return `Property '${generatePath(parentKeys, node.key)}' was changed from ${oldVal} to ${newVal}`;
+  },
+  added: (node, parentKeys) => `Property '${generatePath(parentKeys, node.key)}' was added with value: ${isComplex(node.value)}`,
+  deleted: (node, parentKeys) => `Property '${generatePath(parentKeys, node.key)}' was deleted`,
+};
+
+const iter = (ast, parentKeys) => ast.map((node) => mappings[node.state](node, parentKeys, iter));
+
+const render = (ast) => _.flattenDeep(iter(ast, [])).filter((str) => str).join('\n');
 
 export default render;
