@@ -1,80 +1,69 @@
 import _ from 'lodash';
 
-const getTabIndent = (times) => '    '.repeat(times);
+const indent = (number) => '    '.repeat(number);
 
-const getMarkers = (state) => {
-  switch (state) {
-    case 'added':
-      return ['+ '];
-    case 'deleted':
-      return ['- '];
-    case 'unchanged':
-      return ['  '];
-    case 'changed':
-      return ['- ', '+ '];
-    default:
-      throw new Error(`Unknown state ${state}!`);
-  }
+const generateNestedElements = (node, depth, marker, iter) => {
+  const { key, children } = node;
+  const elements = iter(children, depth + 1);
+
+  return [
+    `${indent(depth)}${marker}${key}: {`,
+    elements,
+    `${indent(depth + 1)}}`,
+  ];
 };
 
-const getStringElementsForChildren = (formattedAst, name, marker, depth) => [
-  `${getTabIndent(depth)}  ${marker}${name}: {`,
-  formattedAst,
-  `${getTabIndent(depth + 1)}}`,
-];
+const generateStandardElements = (node, depth, marker) => {
+  const { key, value } = node;
 
-const getStringElementsForValues = (values, name, markers, depth) => values
-  .filter((value) => !_.isNull(value))
-  .map((element, i) => {
-    const marker = markers[i];
+  if (_.isObject(value)) {
+    const elements = Object.entries(value)
+      .map(([entKey, entValue]) => `${entKey}: ${entValue}`);
 
-    if (_.isObject(element)) {
-      const elementAsString = Object.entries(element)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join('');
-      const elementsArr = [
-        `${getTabIndent(depth)}  ${marker}${name}: {`,
-        `${getTabIndent(depth + 2)}${elementAsString}`,
-        `${getTabIndent(depth + 1)}}`,
-      ];
-
-      return elementsArr;
-    }
-
-    const elementsArr = [
-      `${getTabIndent(depth)}  ${marker}${name}: ${element}`,
+    return [
+      `${indent(depth)}${marker}${key}: {`,
+      `${indent(depth + 2)}${elements}`,
+      `${indent(depth + 1)}}`,
     ];
-
-    return elementsArr;
-  });
-
-const generateStringElements = (tree, depth) => tree.map((subtree) => {
-  const {
-    name,
-    state,
-    values,
-    children,
-  } = subtree;
-
-  const markers = getMarkers(state);
-
-  if (!_.isNull(children)) {
-    const formattedAst = generateStringElements(children, depth + 1);
-    const [marker] = markers;
-
-    return getStringElementsForChildren(formattedAst, name, marker, depth);
   }
 
-  return getStringElementsForValues(values, name, markers, depth);
-});
+  return [`${indent(depth)}${marker}${key}: ${value}`];
+};
+
+const generateChangedElements = (node, depth) => {
+  const { key, oldValue, newValue } = node;
+
+  return [
+    ...generateStandardElements({ key, value: oldValue }, depth, '  - '),
+    ...generateStandardElements({ key, value: newValue }, depth, '  + '),
+  ];
+};
+
+const markers = {
+  nested: '    ',
+  unchanged: '    ',
+  changed: '',
+  added: '  + ',
+  deleted: '  - ',
+};
+
+const mappings = {
+  nested: generateNestedElements,
+  unchanged: generateStandardElements,
+  changed: generateChangedElements,
+  added: generateStandardElements,
+  deleted: generateStandardElements,
+};
+
+const iter = (ast, depth) => ast
+  .map((node) => mappings[node.state](node, depth, markers[node.state], iter));
 
 const render = (ast) => {
   const initialDepth = 0;
-  const stringElements = generateStringElements(ast, initialDepth);
-  const flatElementsArr = _.flattenDeep(stringElements);
-  const result = `{\n${flatElementsArr.join('\n')}\n}`;
+  const stringElements = iter(ast, initialDepth);
+  const flatElements = _.flattenDeep(stringElements);
 
-  return result;
+  return `{\n${flatElements.join('\n')}\n}`;
 };
 
 export default render;
