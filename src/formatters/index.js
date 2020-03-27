@@ -4,4 +4,4 @@ import json from './json';
 
 const formatters = { tree, plain, json };
 
-export default (format) => formatters[format];
+export default (format, ast) => formatters[format](ast);
