@@ -4,29 +4,27 @@ const buildAst = (objectBefore, objectAfter) => {
   const keys = _.union(Object.keys(objectBefore), Object.keys(objectAfter));
 
   return keys.map((key) => {
-    const valueBefore = objectBefore[key];
-    const valueAfter = objectAfter[key];
-    if (valueBefore === valueAfter) {
-      return { key, state: 'unchanged', value: valueBefore };
+    if (!_.has(objectBefore, key)) {
+      return { key, state: 'added', value: objectAfter[key] };
     }
 
-    if (_.isUndefined(valueBefore, key) && !_.isUndefined(valueAfter, key)) {
-      return { key, state: 'added', value: valueAfter };
+    if (!_.has(objectAfter, key)) {
+      return { key, state: 'deleted', value: objectBefore[key] };
     }
 
-    if (!_.isUndefined(valueBefore, key) && _.isUndefined(valueAfter, key)) {
-      return { key, state: 'deleted', value: valueBefore };
+    if (_.isObject(objectBefore[key]) && _.isObject(objectAfter[key])) {
+      return { key, state: 'nested', children: buildAst(objectBefore[key], objectAfter[key]) };
     }
 
-    if (_.isObject(valueBefore) && _.isObject(valueAfter)) {
-      return { key, state: 'nested', children: buildAst(valueBefore, valueAfter) };
+    if (objectBefore[key] === objectAfter[key]) {
+      return { key, state: 'unchanged', value: objectBefore[key] };
     }
 
     return {
       key,
       state: 'changed',
-      oldValue: valueBefore,
-      newValue: valueAfter,
+      oldValue: objectBefore[key],
+      newValue: objectAfter[key],
     };
   });
 };
