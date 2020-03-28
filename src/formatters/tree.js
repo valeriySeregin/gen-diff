@@ -2,11 +2,14 @@ import _ from 'lodash';
 
 const indent = (number) => '    '.repeat(number);
 
-const stringifyObject = (obj) => Object.entries(obj).map(([key, value]) => `${key}: ${value}`);
+const stringify = (value, depth) => {
+  if (!_.isObject(value)) {
+    return value;
+  }
+  const objectAsString = Object.entries(value).map(([enternalKey, enternalValue]) => `${enternalKey}: ${enternalValue}`);
 
-const stringify = (value, depth) => (
-  _.isObject(value) ? `{\n${indent(depth + 2)}${stringifyObject(value)}\n${indent(depth + 1)}}` : value
-);
+  return `{\n${indent(depth + 2)}${objectAsString}\n${indent(depth + 1)}}`;
+};
 
 const mappings = {
   nested: ({ key, children }, depth, iter) => `${indent(depth)}    ${key}: {\n${iter(children, depth + 1).join('\n')}\n${indent(depth + 1)}}`,
