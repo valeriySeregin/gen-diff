@@ -13,7 +13,7 @@ const generatePath = (parents, currentKey) => [...parents, currentKey].join('.')
 
 const mappings = {
   nested: (node, parentKeys, iter) => iter(node.children, [...parentKeys, node.key]),
-  unchanged: () => '',
+  unchanged: () => null,
   changed: (node, parentKeys) => {
     const oldVal = stringify(node.oldValue);
     const newVal = stringify(node.newValue);
