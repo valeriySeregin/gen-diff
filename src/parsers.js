@@ -1,14 +1,14 @@
 import yaml from 'js-yaml';
 import ini from 'ini';
 
-export default (fileData, type) => {
+export default (data, type) => {
   const parsers = {
-    json: (content) => JSON.parse(content),
-    yml: (content) => yaml.safeLoad(content),
-    ini: (content) => ini.parse(content),
+    json: JSON.parse,
+    yml: yaml.safeLoad,
+    ini: ini.parse,
   };
 
   const parseFile = parsers[type];
 
-  return parseFile(fileData);
+  return parseFile(data);
 };
